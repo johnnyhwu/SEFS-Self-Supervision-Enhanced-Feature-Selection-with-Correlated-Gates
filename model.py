@@ -324,44 +324,18 @@ class SEFS_S_Phase:
             self.LOSS              = tf.reduce_mean(loss_main) + self.lmbda * self.loss_m0 + loss_reg_p
                                     
             
-            self.vars_all          = self.vars_encoder+self.vars_predictor+self.vars_selector
             self.vars_finetune     = self.vars_encoder_last+self.vars_predictor+self.vars_selector
-            self.vars_noencoder    = self.vars_predictor+self.vars_selector
             
-            grad_main_all           = tf.gradients(ys=self.LOSS, xs=self.vars_all)
             grad_main_finetune      = tf.gradients(ys=self.LOSS, xs=self.vars_finetune)
-            grad_main_noencoder     = tf.gradients(ys=self.LOSS, xs=self.vars_noencoder)
             
-            opt_main_noencoder      = tf.train.AdamOptimizer(learning_rate =self.lr_rate)            
-            self.solver_noencoder   = opt_main_noencoder.apply_gradients(
-                grads_and_vars=[(grad, var) for grad,var in zip(grad_main_noencoder, self.vars_noencoder)]
-            )
-            opt_main_all            = tf.train.AdamOptimizer(learning_rate =self.lr_rate)
-            self.solver_all         = opt_main_all.apply_gradients(
-                grads_and_vars=[(grad, var) for grad,var in zip(grad_main_all, self.vars_all)]
-            )
             opt_main_finetune       = tf.train.AdamOptimizer(learning_rate =self.lr_rate)
             self.solver_finetune    = opt_main_finetune.apply_gradients(
                 grads_and_vars=[(grad, var) for grad,var in zip(grad_main_finetune, self.vars_finetune)]
             )            
 
-                
-    def train_noencoder(self, x_, x_bar_, y_, q_, lmbda_=1e-3, lr_train_=1e-3, k_prob_=1.0):
-        return self.sess.run([self.solver_noencoder, self.LOSS, self.loss_m0],
-                             feed_dict={self.x:x_, self.x_bar:x_bar_, self.y:y_, self.q:q_,
-                                        self.lmbda: lmbda_,
-                                        self.lr_rate: lr_train_, 
-                                        self.k_prob: k_prob_})
     
     def train_finetune(self, x_, x_bar_, y_, q_, lmbda_=1e-3, lr_train_=1e-3, k_prob_=1.0):
         return self.sess.run([self.solver_finetune, self.LOSS, self.loss_m0],
-                             feed_dict={self.x:x_, self.x_bar:x_bar_, self.y:y_, self.q:q_,
-                                        self.lmbda: lmbda_,
-                                        self.lr_rate: lr_train_, 
-                                        self.k_prob: k_prob_})
-    
-    def train_all(self, x_, x_bar_, y_, q_, lmbda_=1e-3, lr_train_=1e-3, k_prob_=1.0):
-        return self.sess.run([self.solver_all, self.LOSS, self.loss_m0],
                              feed_dict={self.x:x_, self.x_bar:x_bar_, self.y:y_, self.q:q_,
                                         self.lmbda: lmbda_,
                                         self.lr_rate: lr_train_, 

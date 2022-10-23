@@ -43,3 +43,14 @@ class Phase_1_Dataset(Dataset):
 
     def __getitem__(self, idx):
         return self.X[idx], self.X[idx]
+
+class Phase_2_Dataset(Dataset):
+    def __init__(self, X, y):
+        self.X = torch.from_numpy(X)
+        self.y = torch.from_numpy(y)
+
+    def __len__(self):
+        return self.X.shape[0]
+
+    def __getitem__(self, idx):
+        return self.X[idx], self.y[idx]
